@@ -3,7 +3,7 @@
         <div class="col-md-8">
             
             <div class="input-group mb-3">
-                <form @submit.prevent="findAllByBtsNumderOrAddress">
+                <form @submit.prevent="findAllByBtsNumber">
                 <input type="text" class="form-control inputform" placeholder="Поиск по номеру или адресу БС" v-model="filter" />
                 </form>
                 <div class="input-group-append ms-3">
