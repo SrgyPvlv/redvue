@@ -34,7 +34,7 @@
         </div>
         <div class="col-md-6">
             <div v-if="currentBts">
-                <h4> БС № {{ currentBts.bts_number }} </h4>
+                <span class="h4"> БС № {{ currentBts.bts_number }} </span><span class="fs-4 ms-2 ">({{ this.currentBtsSide }})</span>
                 <h5>{{ currentBts.address }}</h5>
                 <div>
                     <label><strong>Ключ: </strong></label> {{ this.currentBtsKey }}
@@ -81,6 +81,7 @@ import RouterDataService from '../services/RouterDataService';
 import BtsInfoDataService from '../services/BtsInfoDataService';
 import KeyTypeDataService from '../services/KeyTypeDataService';
 import BtsContactsDataService from '../services/BtsContactsDataService';
+import SideDataService from '../services/SideDataService';
 
 export default{
     name: "routers",
@@ -91,6 +92,7 @@ export default{
             currentBtsInfo:null,
             currentBtsContacts:[],
             currentBtsKey:"",
+            currentBtsSide:"",
             currentIndex:-1,
             filter:"",
             contactshow:false
@@ -115,6 +117,7 @@ export default{
             this.getRouteByBtsNumber(this.currentBts.bts_number);
             this.getBsContacts(this.currentBts.bts_number);
             setTimeout(()=>this.getKeyType(this.currentBtsInfo.id_key_type),30);
+            setTimeout(()=>this.getSide(this.currentBtsInfo.id_side),30);
         },
         getRouteByBtsNumber(btsNumber){
             RouterDataService.getRouteByBtsNumber(btsNumber).
@@ -128,6 +131,14 @@ export default{
             KeyTypeDataService.getKeyTypeById(id).
             then(response=>{
                 this.currentBtsKey=response.data.type;
+                console.log(response.data);
+            })
+            .catch(e=>{console.log(e)});
+        },
+        getSide(id){
+            SideDataService.getSideById(id).
+            then(response=>{
+                this.currentBtsSide=response.data.type;
                 console.log(response.data);
             })
             .catch(e=>{console.log(e)});
