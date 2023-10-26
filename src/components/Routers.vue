@@ -3,7 +3,7 @@
         <div class="col-md-8">
             
             <div class="input-group mb-3">
-                <form @submit.prevent="findAllByBtsNumber">
+                <form @submit.prevent="findAllByBtsNumderOrAddress">
                 <input type="text" class="form-control inputform" placeholder="Поиск по номеру или адресу БС" v-model="filter" />
                 </form>
                 <div class="input-group-append ms-3">
@@ -34,7 +34,11 @@
         </div>
         <div class="col-md-6">
             <div v-if="currentBts">
-                <span class="h4"> БС № {{ currentBts.bts_number }} </span><span class="fs-4 ms-2 ">({{ this.currentBtsSide }})</span>
+                <span class="h4"> БС № {{ currentBts.bts_number }} </span>
+                <span class="fs-4 ms-2">({{ this.currentBtsSide }})</span>
+                <span class="fs-6 ms-3">
+                <a :href="'https://yandex.ru/maps/?pt='+currentBtsCoord.coord_b+','+currentBtsCoord.coord_a+'&z=15&l=map'" target="_blank"><img src="src/components/icons/yamaps.png" width="30" height="30" title="Смотреть на карте"></a>
+                </span>
                 <h5>{{ currentBts.address }}</h5>
                 <div>
                     <label><strong>Ключ: </strong></label> {{ this.currentBtsKey }}
@@ -73,6 +77,33 @@
                 <p>Выберите БС...</p>
             </div>
         </div>
+        <div class="col-md-1 rightnav">
+            <button @click="showBatteries" class="btn btn-warning akbbtn">Состояние АКБ</button> 
+
+        </div>
+    </div>
+
+    <div id="myModal" class="modal">
+       <!-- Modal content -->
+       <div class="modal-content">
+        <span @click="hideBatteries" class="text-end close">&times;</span>
+        <span class="text-center h4 text-primary">Состояние АКБ</span>
+        <ul class="list-group list-group-flush list-group-numbered">
+                <li class="list-group-item bts" v-for="(currentBtsBatt, index) in currentBtsBatts" :key="index">
+                    <table>
+                        <tr>
+                          <th style="width:24%">Тип АКБ</th><th style="width:10%">Емкость АКБ</th><th style="width:11%">Ток оборудования</th>
+                          <th style="width:11%">Время работы от АКБ</th>
+                          <th style="width:17%">ЭПУ №1</th><th style="width:17%">ЭПУ №2</th><th style="width:10%">Выпрямители</th></tr>
+                        <tr>
+                          <td>{{ currentBtsBatt.battary_type }}</td><td>{{ currentBtsBatt.battary_capacity }}</td><td>{{ currentBtsBatt.equip_curr }}</td>
+                          <td>{{ Math.round(currentBtsBatt.battary_capacity*0.7/currentBtsBatt.equip_curr) }}</td>
+                          <td>{{ currentBtsBatt.powerbox1 }}</td><td>{{ currentBtsBatt.powerbox2 }}</td><td>{{ currentBtsBatt.num_of_units }}</td>
+                        </tr>
+                    </table>
+                </li>
+            </ul>
+       </div>
     </div>
 </template>
 
@@ -82,6 +113,8 @@ import BtsInfoDataService from '../services/BtsInfoDataService';
 import KeyTypeDataService from '../services/KeyTypeDataService';
 import BtsContactsDataService from '../services/BtsContactsDataService';
 import SideDataService from '../services/SideDataService';
+import BtsCoordDataService from '../services/BtsCoordDataService';
+import BtsBatteryDataService from '../services/BtsBatteryDataService';
 
 export default{
     name: "routers",
@@ -93,6 +126,8 @@ export default{
             currentBtsContacts:[],
             currentBtsKey:"",
             currentBtsSide:"",
+            currentBtsCoord:"",
+            currentBtsBatts:[],
             currentIndex:-1,
             filter:"",
             contactshow:false
@@ -108,7 +143,10 @@ export default{
             this.btss = [];
             this.currentBtsInfo=null,
             this.currentBtsKey="";
-            this.currentBtsContacts=[]
+            currentBtsSide="",
+            currentBtsCoord="",
+            this.currentBtsContacts=[],
+            this.currentBtsBatts=[]
         },
         
         setActiveBts(bts,index){
@@ -116,6 +154,8 @@ export default{
             this.currentIndex = bts ? index : -1;
             this.getRouteByBtsNumber(this.currentBts.bts_number);
             this.getBsContacts(this.currentBts.bts_number);
+            this.getBsCoord(this.currentBts.bts_number);
+            this.getBsBatteries(this.currentBts.bts_number);
             setTimeout(()=>this.getKeyType(this.currentBtsInfo.id_key_type),30);
             setTimeout(()=>this.getSide(this.currentBtsInfo.id_side),30);
         },
@@ -139,6 +179,22 @@ export default{
             SideDataService.getSideById(id).
             then(response=>{
                 this.currentBtsSide=response.data.type;
+                console.log(response.data);
+            })
+            .catch(e=>{console.log(e)});
+        },
+        getBsCoord(btsNumber){
+            BtsCoordDataService.getBtsCoordByBtsNumber(btsNumber).
+            then(response=>{
+                this.currentBtsCoord=response.data;
+                console.log(response.data);
+            })
+            .catch(e=>{console.log(e)});
+        },
+        getBsBatteries(btsNumber){
+            BtsBatteryDataService.getBtsBatteryByBtsNumber(btsNumber).
+            then(response=>{
+                this.currentBtsBatts=response.data;
                 console.log(response.data);
             })
             .catch(e=>{console.log(e)});
@@ -177,6 +233,14 @@ export default{
                 console.log(response.data);
             })
             .catch(e=>{console.log(e)});
+        },
+        showBatteries(){
+            var modal = document.getElementById("myModal");
+            modal.style.display = "block";
+        },
+        hideBatteries(){
+            var modal = document.getElementById("myModal");
+            modal.style.display = "none";
         }
         }
 };
@@ -232,5 +296,69 @@ export default{
 }
 .listyle{
     list-style-type: none;
+}
+/* The Modal (background) */
+.modal {
+  display: none; /* Hidden by default */
+  position: fixed; /* Stay in place */
+  z-index: 2; /* Sit on top */
+  left: 0;
+  top: 0;
+  width: 100%; /* Full width */
+  height: 100%; /* Full height */
+  overflow: auto; /* Enable scroll if needed */
+  background-color: rgb(0,0,0); /* Fallback color */
+  background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
+}
+
+/* Modal Content/Box */
+.modal-content {
+  background-color: #fefefe;
+  margin: 12% auto; /* 15% from the top and centered */
+  padding: 20px;
+  border: 1px solid #888;
+  width: 80%; /* Could be more or less, depending on screen size */
+  box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2),0 6px 20px 0 rgba(0,0,0,0.19);
+  animation-name: animatetop;
+  animation-duration: 0.6s
+}
+
+/* Add Animation */
+@keyframes animatetop {
+  from {top: -300px; opacity: 0}
+  to {top: 0; opacity: 1}
+}
+
+/* The Close Button */
+.close {
+  color: red;
+  float: right;
+  font-size: 28px;
+  font-weight: bold;
+}
+
+.close:hover,
+.close:focus {
+  color: black;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+th, td {
+  border: 1px solid black;
+}
+th, td {
+  text-align: center;
+}
+th {
+    background-color: #96D4D4;
+}
+
+.rightnav{
+    position: absolute;
+    right: 10px;
+}
+.akbbtn{
+    
 }
 </style>
