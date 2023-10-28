@@ -34,14 +34,14 @@
         </div>
         <div class="col-md-6">
             <div v-if="currentBts">
-                <span class="h4"> БС № {{ currentBts.bts_number }} </span>
-                <span class="fs-4 ms-2">({{ this.currentBtsSide }})</span>
+                <span class="h4"> БС № {{ currentBtsNumber }} </span>
+                <span class="fs-4 ms-2">({{ currentBtsSide }})</span>
                 <span class="fs-6 ms-3">
-                <a :href="'https://yandex.ru/maps/?pt='+currentBtsCoord.coord_b+','+currentBtsCoord.coord_a+'&z=15&l=map'" target="_blank"><img src="src/components/icons/yamaps.png" width="30" height="30" title="Смотреть на карте"></a>
+                <a :href="'https://yandex.ru/maps/?pt='+currentBtsCoordB+','+currentBtsCoordA+'&z=15&l=map'" target="_blank"><img src="src/components/icons/yamaps.png" width="30" height="30" title="Смотреть на карте"></a>
                 </span>
-                <h5>{{ currentBts.address }}</h5>
+                <h5>{{ currentBtsAddress }}</h5>
                 <div>
-                    <label><strong>Ключ: </strong></label> {{ this.currentBtsKey }}
+                    <label><strong>Ключ: </strong></label> {{ currentBtsKey }}
                 </div>
                 <div>
                     <label><strong>Проезд:</strong></label><br> {{ currentBtsInfo.way_info!=null?currentBtsInfo.way_info:'' }}
@@ -55,54 +55,87 @@
                 <div>
                     <label><strong>Проход к АФУ:</strong></label> <br>{{ currentBtsInfo.ams_info!=null ? currentBtsInfo.ams_info:'' }}
                 </div>
-                
-                <div>
-                    <label><strong>Контакты:</strong></label> <button @click="toggle" class="badge rounded-pill bg-info border-0">{{contactshow?'скрыть':'показать'}}</button>
-                    <ul v-if="contactshow">
-                        <li v-for="(currentBtsContact,index) in currentBtsContacts" key="index">
-                        <mark>{{currentBtsContact.theme!=null? currentBtsContact.theme : ''}}</mark><br>
-                        {{currentBtsContact.name!=null? 'ФИО: '+currentBtsContact.name: '' }}<br v-if="currentBtsContact.name!=null">
-                        {{currentBtsContact.doljnost!=null? 'Должность: '+currentBtsContact.doljnost : '' }}<br v-if="currentBtsContact.doljnost!=null">
-                        {{currentBtsContact.phone!=null? 'Телефон: '+currentBtsContact.phone : '' }}<br v-if="currentBtsContact.phone!=null">
-                        {{currentBtsContact.mail!=null? 'Почта: '+currentBtsContact.mail : '' }}<br v-if="currentBtsContact.mail!=null">
-                        {{currentBtsContact.comment!=null? 'Комментарий: '+currentBtsContact.comment : '' }}<br v-if="currentBtsContact.comment!=null">
-                        {{currentBtsContact.act_date!=null? 'Дата создания: '+currentBtsContact.act_date.split('-').reverse().join('.') : '' }}
-                        </li>
-                    </ul>
-                </div>
-
             </div>
+
             <div v-else>
                 <br>
                 <p>Выберите БС...</p>
             </div>
         </div>
-        <div class="col-md-1 rightnav">
-            <button @click="showBatteries" class="btn btn-warning akbbtn">Состояние АКБ</button> 
-
+        <div class="col-md-1">
+          <div>
+            <span @click="showContacts" class="badge rounded-pill bg-info border-0 fs-6 akbbtn">Контакты</span> 
+          </div>  
+          <div class="mt-3">
+            <span @click="showBatteries" class="badge rounded-pill bg-warning border-0 fs-6 akbbtn">АКБ</span> 
+          </div>
+          <div class="mt-3">
+            <span @click="showGeneralInfo" class="badge rounded-pill bg-success border-0 fs-6 akbbtn">Общее</span> 
+          </div>
         </div>
     </div>
 
     <div id="myModal" class="modal">
-       <!-- Modal content -->
        <div class="modal-content">
         <span @click="hideBatteries" class="text-end close">&times;</span>
         <span class="text-center h4 text-primary">Состояние АКБ</span>
-        <ul class="list-group list-group-flush list-group-numbered">
-                <li class="list-group-item bts" v-for="(currentBtsBatt, index) in currentBtsBatts" :key="index">
-                    <table>
-                        <tr>
-                          <th style="width:24%">Тип АКБ</th><th style="width:10%">Емкость АКБ</th><th style="width:11%">Ток оборудования</th>
-                          <th style="width:11%">Время работы от АКБ</th>
-                          <th style="width:17%">ЭПУ №1</th><th style="width:17%">ЭПУ №2</th><th style="width:10%">Выпрямители</th></tr>
-                        <tr>
-                          <td>{{ currentBtsBatt.battary_type }}</td><td>{{ currentBtsBatt.battary_capacity }}</td><td>{{ currentBtsBatt.equip_curr }}</td>
-                          <td>{{ Math.round(currentBtsBatt.battary_capacity*0.7/currentBtsBatt.equip_curr) }}</td>
-                          <td>{{ currentBtsBatt.powerbox1 }}</td><td>{{ currentBtsBatt.powerbox2 }}</td><td>{{ currentBtsBatt.num_of_units }}</td>
-                        </tr>
-                    </table>
-                </li>
-            </ul>
+            <table class="mt-3 mb-3">
+                <tr>
+                    <th style="width:24%">Тип АКБ</th><th style="width:10%">Емкость АКБ</th><th style="width:11%">Ток оборудования</th>
+                    <th style="width:11%">Время работы от АКБ</th>
+                    <th style="width:17%">ЭПУ №1</th><th style="width:17%">ЭПУ №2</th><th style="width:10%">Выпрямители</th>
+                </tr>
+                <tr v-for="(currentBtsBatt, index) in currentBtsBatts" :key="index">
+                    <td>{{ currentBtsBatt.battary_type }}</td><td>{{ currentBtsBatt.battary_capacity }}</td><td>{{ currentBtsBatt.equip_curr }}</td>
+                    <td>{{ currentBtsBatt.equip_curr!=0 ? Math.round(currentBtsBatt.battary_capacity*0.7/currentBtsBatt.equip_curr) : '' }}</td>
+                    <td>{{ currentBtsBatt.powerbox1 }}</td><td>{{ currentBtsBatt.powerbox2 }}</td><td>{{ currentBtsBatt.num_of_units }}</td>
+                </tr>
+            </table>
+       </div>
+    </div>
+    <div id="myModal2" class="modal">
+       <div class="modal-content">
+        <span @click="hideGeneralInfo" class="text-end close">&times;</span>
+        <span class="text-center h4 text-primary">Общая информация</span>
+            <table class="mt-3">
+                <tr>
+                    <th style="width:7%">Номер</th><th style="width:35%">Адрес</th><th style="width:10%">Широта</th>
+                    <th style="width:10%">Долгота</th><th style="width:10%">Направление</th><th style="width:10%">Время на дорогу</th>
+                </tr>
+                <tr>
+                    <td>{{ currentBtsNumber }}</td><td>{{ currentBtsAddress }}</td><td>{{ currentBtsCoordA }}</td>
+                    <td>{{ currentBtsCoordB }}</td><td>{{ currentBtsSide }}</td><td>{{ currentBtsTravelTime }}</td>
+                </tr>
+            </table>
+            <table class="mt-5 mb-3">
+                <tr>
+                    <th style="width:25%">Тип АМС</th><th style="width:25%">Высота АМС</th><th style="width:25%">Тип аппаратной</th><th style="width:25%">Ключ</th>
+                </tr>
+                <tr>
+                    <td>{{ currentBtsAms }}</td><td>{{ currentBtsAmsHeight }}</td><td>{{ currentBtsSite }}</td><td>{{ currentBtsKey }}</td>
+                </tr>
+            </table>
+       </div>
+    </div>
+    <div id="myModal3" class="modal">
+       <div class="modal-content">
+        <span @click="hideContacts" class="text-end close">&times;</span>
+        <span class="text-center h4 text-primary">Контакты</span>
+        <table class="mt-3 mb-3">
+            <tr>
+                <th style="width:17%">Тема</th><th style="width:10%">ФИО</th><th style="width:11%">Должность</th>
+                <th style="width:11%">Телефон</th>
+                <th style="width:11%">Почта</th><th style="width:17%">Комментарий</th><th style="width:7%">Дата</th>
+            </tr>
+            <tr v-for="(currentBtsContact,index) in currentBtsContacts" key="index">
+                <td style="width:17%;font-weight: bold;">{{currentBtsContact.theme!=null? currentBtsContact.theme : ''}}</td><td style="width:10%">{{currentBtsContact.name!=null? currentBtsContact.name: '' }}</td>
+                <td style="width:11%">{{currentBtsContact.doljnost!=null? currentBtsContact.doljnost : '' }}</td>
+                <td style="width:11%">{{currentBtsContact.phone!=null? currentBtsContact.phone : '' }}</td>
+                <td style="width:11%">{{currentBtsContact.mail!=null? currentBtsContact.mail : '' }}</td>
+                <td style="width:17%">{{currentBtsContact.comment!=null? currentBtsContact.comment : '' }}</td>
+                <td style="width:7%">{{currentBtsContact.act_date!=null? currentBtsContact.act_date.split('-').reverse().join('.') : '' }}</td>
+            </tr> 
+        </table>
        </div>
     </div>
 </template>
@@ -115,6 +148,8 @@ import BtsContactsDataService from '../services/BtsContactsDataService';
 import SideDataService from '../services/SideDataService';
 import BtsCoordDataService from '../services/BtsCoordDataService';
 import BtsBatteryDataService from '../services/BtsBatteryDataService';
+import SiteTypeDataService from '../services/SiteTypeDataService';
+import AmsTypeDataService from '../services/AmsTypeDataService';
 
 export default{
     name: "routers",
@@ -123,8 +158,16 @@ export default{
             btss:[],
             currentBts:null,
             currentBtsInfo:null,
+            currentBtsNumber:"",
+            currentBtsAddress:"",
+            currentBtsCoordA:"",
+            currentBtsCoordB:"",
             currentBtsContacts:[],
             currentBtsKey:"",
+            currentBtsAms:"",
+            currentBtsAmsHeight:"",
+            currentBtsTravelTime:"",
+            currentBtsSite:"",
             currentBtsSide:"",
             currentBtsCoord:"",
             currentBtsBatts:[],
@@ -142,9 +185,17 @@ export default{
             this.filter="";
             this.btss = [];
             this.currentBtsInfo=null,
+            currentBtsNumber="",
+            currentBtsAddress="",
+            currentBtsCoordA="",
+            currentBtsCoordB="",
             this.currentBtsKey="";
-            currentBtsSide="",
-            currentBtsCoord="",
+            this.currentBtsSide="",
+            this.currentBtsAms="",
+            this.currentBtsSite="",
+            this.currentBtsCoord="",
+            this.currentBtsAmsHeight="",
+            this.currentBtsTravelTime="",
             this.currentBtsContacts=[],
             this.currentBtsBatts=[]
         },
@@ -158,6 +209,14 @@ export default{
             this.getBsBatteries(this.currentBts.bts_number);
             setTimeout(()=>this.getKeyType(this.currentBtsInfo.id_key_type),30);
             setTimeout(()=>this.getSide(this.currentBtsInfo.id_side),30);
+            setTimeout(()=>this.getSiteType(this.currentBtsInfo.id_site),30);
+            setTimeout(()=>this.getAmsType(this.currentBtsInfo.id_ams_type),30);
+            setTimeout(()=>this.getcurrentBtsNumber(),30);
+            setTimeout(()=>this.getcurrentBtsAddress(),30);
+            setTimeout(()=>this.getcurrentBtsCoordA(),30);
+            setTimeout(()=>this.getcurrentBtsCoordB(),30);
+            setTimeout(()=>this.getcurrentBtsAmsHeight(),30);
+            setTimeout(()=>this.getcurrentBtsTravelTime(),30);
         },
         getRouteByBtsNumber(btsNumber){
             RouterDataService.getRouteByBtsNumber(btsNumber).
@@ -179,6 +238,22 @@ export default{
             SideDataService.getSideById(id).
             then(response=>{
                 this.currentBtsSide=response.data.type;
+                console.log(response.data);
+            })
+            .catch(e=>{console.log(e)});
+        },
+        getSiteType(id){
+            SiteTypeDataService.getSiteTypeById(id).
+            then(response=>{
+                this.currentBtsSite=response.data.type;
+                console.log(response.data);
+            })
+            .catch(e=>{console.log(e)});
+        },
+        getAmsType(id){
+            AmsTypeDataService.getAmsTypeById(id).
+            then(response=>{
+                this.currentBtsAms=response.data.type;
                 console.log(response.data);
             })
             .catch(e=>{console.log(e)});
@@ -206,6 +281,24 @@ export default{
                 console.log(response.data);
             })
             .catch(e=>{console.log(e)});
+        },
+        getcurrentBtsNumber(){
+            this.currentBtsNumber = this.currentBts.bts_number;
+        },
+        getcurrentBtsAddress(){
+            this.currentBtsAddress = this.currentBts.address;
+        },
+        getcurrentBtsCoordA(){
+            this.currentBtsCoordA = this.currentBtsCoord.coord_a;
+        },
+        getcurrentBtsCoordB(){
+            this.currentBtsCoordB = this.currentBtsCoord.coord_b;
+        },
+        getcurrentBtsAmsHeight(){
+            this.currentBtsAmsHeight = this.currentBtsInfo.ams_height;
+        },
+        getcurrentBtsTravelTime(){
+            this.currentBtsTravelTime = this.currentBts.travel_time;
         },
         toggle(){
             this.contactshow =! this.contactshow;
@@ -240,6 +333,22 @@ export default{
         },
         hideBatteries(){
             var modal = document.getElementById("myModal");
+            modal.style.display = "none";
+        },
+        showGeneralInfo(){
+            var modal = document.getElementById("myModal2");
+            modal.style.display = "block";
+        },
+        hideGeneralInfo(){
+            var modal = document.getElementById("myModal2");
+            modal.style.display = "none";
+        },
+        showContacts(){
+            var modal = document.getElementById("myModal3");
+            modal.style.display = "block";
+        },
+        hideContacts(){
+            var modal = document.getElementById("myModal3");
             modal.style.display = "none";
         }
         }
@@ -356,9 +465,10 @@ th {
 
 .rightnav{
     position: absolute;
-    right: 10px;
+    right: 20px;
 }
 .akbbtn{
-    
+    width: 150px;
+    cursor:pointer
 }
 </style>
