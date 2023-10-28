@@ -37,7 +37,7 @@
                 <span class="h4"> БС № {{ currentBtsNumber }} </span>
                 <span class="fs-4 ms-2">({{ currentBtsSide }})</span>
                 <span class="fs-6 ms-3">
-                <a :href="'https://yandex.ru/maps/?pt='+currentBtsCoordB+','+currentBtsCoordA+'&z=15&l=map'" target="_blank"><img src="src/components/icons/yamaps.png" width="30" height="30" title="Смотреть на карте"></a>
+                <a :href="'https://yandex.ru/maps/?pt='+currentBtsCoordB+','+currentBtsCoordA+'&z=15&l=map'" target="_blank"><img src="./icons/yamaps.png" width="30" height="30" title="Смотреть на карте"></a>
                 </span>
                 <h5>{{ currentBtsAddress }}</h5>
                 <div>
