@@ -159,6 +159,7 @@ export default{
             currentBts:null,
             currentBtsInfo:null,
             currentBtsNumber:"",
+            currentBtsId:"",
             currentBtsAddress:"",
             currentBtsCoordA:"",
             currentBtsCoordB:"",
@@ -186,6 +187,7 @@ export default{
             this.btss = [];
             this.currentBtsInfo=null,
             currentBtsNumber="",
+            currentBtsId="",
             currentBtsAddress="",
             currentBtsCoordA="",
             currentBtsCoordB="",
@@ -207,7 +209,8 @@ export default{
             this.getBsContacts(this.currentBts.bts_number);
             this.getBsCoord(this.currentBts.bts_number);
             this.getBsBatteries(this.currentBts.bts_number);
-            setTimeout(()=>this.getKeyType(this.currentBtsInfo.id_key_type),30);
+            this.getKeyType(this.currentBts.id);
+            //setTimeout(()=>this.getKeyType(this.currentBtsInfo.id),30);
             setTimeout(()=>this.getSide(this.currentBtsInfo.id_side),30);
             setTimeout(()=>this.getSiteType(this.currentBtsInfo.id_site),30);
             setTimeout(()=>this.getAmsType(this.currentBtsInfo.id_ams_type),30);
@@ -227,7 +230,7 @@ export default{
             .catch(e=>{console.log(e)});
         },
         getKeyType(id){
-            KeyTypeDataService.getKeyTypeById(id).
+            KeyTypeDataService.getKeyTypesByAboutBtsId(id).
             then(response=>{
                 this.currentBtsKey=response.data.type;
                 console.log(response.data);
@@ -284,6 +287,9 @@ export default{
         },
         getcurrentBtsNumber(){
             this.currentBtsNumber = this.currentBts.bts_number;
+        },
+        getcurrentBtsId(){
+            this.currentBtsId = this.currentBts.id;
         },
         getcurrentBtsAddress(){
             this.currentBtsAddress = this.currentBts.address;
