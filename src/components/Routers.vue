@@ -210,7 +210,8 @@ export default{
             this.getBsContacts(this.currentBts.bts_number);
             this.getBsCoord(this.currentBts.bts_number);
             this.getBsBatteries(this.currentBts.bts_number);
-            this.getKeyType(this.currentBts.id);
+            //this.getKeyType(this.currentBts.id);
+            setTimeout(()=>this.getKeyType(this.currentBtsInfo.id),30);
             setTimeout(()=>this.getSide(this.currentBtsInfo.id_side),30);
             setTimeout(()=>this.getSiteType(this.currentBtsInfo.id_site),30);
             setTimeout(()=>this.getAmsType(this.currentBtsInfo.id_ams_type),30);
