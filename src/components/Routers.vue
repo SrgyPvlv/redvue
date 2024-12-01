@@ -41,7 +41,8 @@
                 </span>
                 <h5>{{ currentBtsAddress }}</h5>
                 <div>
-                    <label><strong>Ключ: </strong></label> {{ currentBtsKey }}
+                    <label><strong>Ключ: </strong></label>
+                    <li v-for="(currentBtsKey, index) in currentBtsKeys" :key="index"> {{ currentBtsKey.type!=null ? currentBtsKey.type : '' }} </li>
                 </div>
                 <div>
                     <label><strong>Проезд:</strong></label><br> {{ currentBtsInfo.way_info!=null?currentBtsInfo.way_info:'' }}
@@ -112,7 +113,7 @@
                     <th style="width:25%">Тип АМС</th><th style="width:25%">Высота АМС</th><th style="width:25%">Тип аппаратной</th><th style="width:25%">Ключ</th>
                 </tr>
                 <tr>
-                    <td>{{ currentBtsAms }}</td><td>{{ currentBtsAmsHeight }}</td><td>{{ currentBtsSite }}</td><td>{{ currentBtsKey }}</td>
+                    <td>{{ currentBtsAms }}</td><td>{{ currentBtsAmsHeight }}</td><td>{{ currentBtsSite }}</td><td><li v-for="(currentBtsKey, index) in currentBtsKeys" :key="index"> {{ currentBtsKey.type!=null ? currentBtsKey.type : '' }} </li></td>
                 </tr>
             </table>
        </div>
@@ -164,7 +165,7 @@ export default{
             currentBtsCoordA:"",
             currentBtsCoordB:"",
             currentBtsContacts:[],
-            currentBtsKey:[],
+            currentBtsKeys:[],
             currentBtsAms:"",
             currentBtsAmsHeight:"",
             currentBtsTravelTime:"",
@@ -191,7 +192,7 @@ export default{
             currentBtsAddress="",
             currentBtsCoordA="",
             currentBtsCoordB="",
-            this.currentBtsKey=[];
+            this.currentBtsKeys=[];
             this.currentBtsSide="",
             this.currentBtsAms="",
             this.currentBtsSite="",
@@ -210,7 +211,6 @@ export default{
             this.getBsCoord(this.currentBts.bts_number);
             this.getBsBatteries(this.currentBts.bts_number);
             this.getKeyType(this.currentBts.id);
-            //setTimeout(()=>this.getKeyType(this.currentBtsInfo.id),30);
             setTimeout(()=>this.getSide(this.currentBtsInfo.id_side),30);
             setTimeout(()=>this.getSiteType(this.currentBtsInfo.id_site),30);
             setTimeout(()=>this.getAmsType(this.currentBtsInfo.id_ams_type),30);
@@ -232,7 +232,7 @@ export default{
         getKeyType(id){
             KeyTypeDataService.getKeyTypesByAboutBtsId(id).
             then(response=>{
-                this.currentBtsKey=response.data.type;
+                this.currentBtsKeys=response.data;
                 console.log(response.data);
             })
             .catch(e=>{console.log(e)});
